@@ -8,13 +8,9 @@ using UnityEngine;
 /// Abstract so it isn't used by mistake and inherits from MonoBehaviour so all 
 /// children classes can be used as components in editor
 /// </summary>
-public abstract class Entity : MonoBehaviour, IComparable<Entity>
+public abstract class Entity : MonoBehaviour
 {
     [SerializeField] protected bool isPlayer;
     [SerializeField] protected EntityBaseValues _baseStats;
-
-    public int CompareTo(Entity other)
-    {
-        throw new NotImplementedException();
-    }
+    public bool Paused { get; protected set; }
 }
