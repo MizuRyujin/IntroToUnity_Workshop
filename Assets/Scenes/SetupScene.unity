@@ -1300,7 +1300,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPlayer: 1
   _baseStats: {fileID: 11400000, guid: b56bc793b35436340a7de57d0f471f31, type: 2}
-  _physicsMovement: 0
+  _physicsMovement: 1
   _pVisuals: {fileID: 1176503172}
   _feet: {fileID: 1782623520}
 --- !u!4 &1322153015

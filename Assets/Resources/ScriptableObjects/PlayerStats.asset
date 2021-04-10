@@ -16,4 +16,4 @@ MonoBehaviour:
   _armorPoints: 0
   _baseDamage: 1
   _speed: 100
-  _moveForce: 10000
+  _moveForce: 200
