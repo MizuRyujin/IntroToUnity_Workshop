@@ -16,6 +16,8 @@ public class PlayerBrain : Entity
 
     [SerializeField] private GameObject _pVisuals;
     [SerializeField] private GameObject _feet;
+    [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private ParticleSystem _hitParticles;
 
     /// <summary>
     /// This is a reference to the rigidbody so we can access functionalities
@@ -49,7 +51,7 @@ public class PlayerBrain : Entity
         get
         {
             Collider2D cols = Physics2D.OverlapCircle(_feet.transform.position,
-                                                1f, LayerMask.GetMask("Ground"));
+                                                1f, _groundLayer);
             return cols != null;
         }
     }
@@ -65,15 +67,6 @@ public class PlayerBrain : Entity
         _pActions = new PlayerActions();
         _pActions.InGame.Movement.started += ctx => RotateVisuals();
         _pActions.InGame.Jump.performed += _ => Jump();
-    }
-
-    /// <summary>
-    /// Start is called on the frame when a script is enabled just before
-    /// any of the Update methods is called the first time.
-    /// </summary>
-    private void Start()
-    {
-
     }
 
     private void Update()
@@ -129,7 +122,6 @@ public class PlayerBrain : Entity
         }
         OnJump();
         _rb.transform.Translate((Vector3)_moveDir * Time.fixedDeltaTime);
-        // transform.Translate((Vector3)_moveDir * Time.fixedDeltaTime);
     }
 
     private void PhysicsMovement()
@@ -138,9 +130,8 @@ public class PlayerBrain : Entity
         if (!(_rb.velocity.magnitude > _baseStats.Speed) && _moveDir != Vector2.zero)
         {
             //* if not, add force
-            print("Apply force");
+            OnJump();
             _rb.AddForce(_moveDir * _baseStats.MoveForce * 2);
-
         }
     }
 
@@ -207,4 +198,11 @@ public class PlayerBrain : Entity
         Gizmos.DrawSphere(_feet.transform.position, 1f);
     }
 
+}
+
+public enum MoveTypes
+{
+    WALKING,
+    IDLE,
+    JUMP,
 }
