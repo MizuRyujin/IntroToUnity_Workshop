@@ -42,6 +42,8 @@ public class PlayerBrain : Entity
 
     private Vector2 _moveDir;
 
+    private bool _shouldJump;
+
     public bool IsGrounded
     {
         get
@@ -62,7 +64,7 @@ public class PlayerBrain : Entity
 
         _pActions = new PlayerActions();
         _pActions.InGame.Movement.started += ctx => RotateVisuals();
-        _pActions.InGame.Jump.performed += ctx => Jump();
+        _pActions.InGame.Jump.performed += _ => Jump();
     }
 
     /// <summary>
@@ -71,10 +73,7 @@ public class PlayerBrain : Entity
     /// </summary>
     private void Start()
     {
-        if (!IsGrounded)
-        {
-            _moveDir.y = Physics2D.gravity.y * _rb.gravityScale;
-        }
+
     }
 
     private void Update()
@@ -84,19 +83,22 @@ public class PlayerBrain : Entity
         //* Get player input every frame
         GetInput();
         ChangeColliders();
-        if (!_physicsMovement)
-        {
-            KinematicMovement();
-        }
+        RotateVisuals();
     }
 
     private void FixedUpdate()
     {
         if (Paused) return;
 
-        if (_physicsMovement)
+        switch (_physicsMovement)
         {
-            PhysicsMovement();
+            case true:
+                PhysicsMovement();
+                break;
+
+            default:
+                KinematicMovement();
+                break;
         }
     }
 
@@ -118,31 +120,42 @@ public class PlayerBrain : Entity
                     break;
 
                 default:
-                    auxMove.y = Physics.gravity.y * _rb.gravityScale;
+                    auxMove.y = Physics.gravity.y;
                     break;
             }
             auxMove.x = _moveDir.x * _baseStats.Speed;
 
-            //* Create jump method
             _moveDir = auxMove;
-            // _rb.transform.position += (Vector3)auxMove * _baseStats.Speed * Time.deltaTime;
         }
-        _rb.MovePosition(_rb.transform.position + (Vector3)_moveDir * Time.deltaTime);
+        OnJump();
+        _rb.transform.Translate((Vector3)_moveDir * Time.fixedDeltaTime);
+        // transform.Translate((Vector3)_moveDir * Time.fixedDeltaTime);
     }
 
     private void PhysicsMovement()
     {
+        //* Check if magnitude is higher than speed
+        if (!(_rb.velocity.magnitude > _baseStats.Speed) && _moveDir != Vector2.zero)
+        {
+            //* if not, add force
+            print("Apply force");
+            _rb.AddForce(_moveDir * _baseStats.MoveForce * 2);
+
+        }
     }
 
     private void Jump()
     {
-        if (IsGrounded)
-        {
-            Vector2 auxMove = _moveDir;
-            auxMove.y += 1f * _baseStats.Speed;
-            print(auxMove);
+        _shouldJump = true;
+    }
 
-            _moveDir = auxMove;
+    private void OnJump()
+    {
+        if (IsGrounded && _shouldJump)
+        {
+            print("Must jump");
+            _rb.AddForce(new Vector2(0f, _baseStats.MoveForce), ForceMode2D.Impulse);
+            _shouldJump = false;
         }
     }
 
@@ -165,14 +178,17 @@ public class PlayerBrain : Entity
 
     private void RotateVisuals()
     {
-        if (_moveDir.x > 0)
+        if (_moveDir != Vector2.zero)
         {
-            _pVisuals.transform.Rotate(transform.up, 180, Space.Self);
+            Quaternion lookRotation = Quaternion.LookRotation(
+                    new Vector3(_moveDir.x, 0f, 0f), _rb.transform.up);
+
+            if (_moveDir.x < 0f || _moveDir.x > 0f)
+            {
+                _pVisuals.transform.rotation = lookRotation * Quaternion.Euler(0f, 90, 0f);
+            }
         }
-        else if (_moveDir.x < 0)
-        {
-            _pVisuals.transform.Rotate(transform.up, -180, Space.Self);
-        }
+
     }
 
     private void OnEnable()
