@@ -26,7 +26,7 @@ public class CameraMovement : MonoBehaviour
     /// <summary>
     /// Method to create the camera viewport bounds.
     /// </summary>
-    /// <returns> Viewport bounds. </returns>
+    /// <returns> Viewport bounds.</returns>
     private Bounds GetCamBounds()
     {
         Bounds bounds;
