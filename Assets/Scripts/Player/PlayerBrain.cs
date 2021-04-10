@@ -65,6 +65,18 @@ public class PlayerBrain : Entity
         _pActions.InGame.Jump.performed += ctx => Jump();
     }
 
+    /// <summary>
+    /// Start is called on the frame when a script is enabled just before
+    /// any of the Update methods is called the first time.
+    /// </summary>
+    private void Start()
+    {
+        if (!IsGrounded)
+        {
+            _moveDir.y = Physics2D.gravity.y * _rb.gravityScale;
+        }
+    }
+
     private void Update()
     {
         if (Paused) return;
